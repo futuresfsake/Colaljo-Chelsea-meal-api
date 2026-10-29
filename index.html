@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Menu List</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .search-bar { display: flex; gap: 10px; margin: 20px 0; }
+        input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #e67e22; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #cf6d17; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 8px 0; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Meal Menu</h1>
+
+    <div class="search-bar">
+        <input type="search" id="searchInput" placeholder="Search by meal ID">
+        <button type="button" id="searchButton">Search</button>
+    </div>
+
+    <ul id="mealList"></ul>
+
+    <script>
+        const mealList = document.getElementById("mealList");
+        const searchInput = document.getElementById("searchInput");
+        const searchButton = document.getElementById("searchButton");
+
+        function renderMessage(text) {
+            mealList.innerHTML = "";
+            const item = document.createElement("li");
+            item.textContent = text;
+            mealList.appendChild(item);
+        }
+
+        function renderMeals(meals) {
+            mealList.innerHTML = "";
+            meals.forEach(meal => {
+                const item = document.createElement("li");
+                item.textContent = meal.id + ". " + meal.meal + " - ₱" + meal.price;
+                mealList.appendChild(item);
+            });
+        }
+
+        async function loadMeals() {
+            const response = await fetch("/api/meals");
+            renderMeals(await response.json());
+        }
+
+        async function searchMealById() {
+            const query = searchInput.value.trim();
+            if (!query) return loadMeals();
+
+            try {
+                const response = await fetch("/api/meals/" + encodeURIComponent(query));
+                if (!response.ok) throw new Error("Meal not found");
+                renderMeals([await response.json()]);
+            } catch (error) {
+                renderMessage("Meal not found for ID: " + query);
+            }
+        }
+
+        searchButton.addEventListener("click", searchMealById);
+        searchInput.addEventListener("keydown", e => { if (e.key === "Enter") searchMealById(); });
+
+        loadMeals();
+    </script>
+</body>
+</html>
