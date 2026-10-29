@@ -3,55 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meal Menu List</title>
+    <meta name="description" content="Browse today's delicious Chelsea meal menu.">
+    <title>Chelsea Meals | Today's Menu</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        .search-bar { display: flex; gap: 10px; margin: 20px 0; }
-        input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #e67e22; color: white; border: none; border-radius: 5px; }
-        button:hover { background-color: #cf6d17; }
-        ul { list-style-type: none; padding: 0; }
-        li { padding: 8px 0; border-bottom: 1px solid #ddd; }
+        :root {
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --cream: #fffaf3;
+            --paper: #ffffff;
+            --orange: #e87532;
+            --orange-dark: #c9551a;
+            --yellow: #ffd166;
+            --line: #f0e5d8;
+            --shadow: 0 18px 45px rgba(67, 45, 28, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 90% 0%, #ffe9c9 0, transparent 30%),
+                var(--cream);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .shell { max-width: 1120px; margin: 0 auto; padding: 28px 24px 56px; }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 64px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.03em; }
+        .brand-mark {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border-radius: 14px;
+            color: white;
+            background: var(--orange);
+            box-shadow: 0 8px 18px rgba(232, 117, 50, 0.25);
+            font-size: 21px;
+        }
+        .brand span { font-size: 19px; }
+        .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+        .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #35b56b; }
+
+        .hero { max-width: 720px; margin-bottom: 40px; }
+        .eyebrow {
+            margin: 0 0 14px;
+            color: var(--orange-dark);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+        h1 { margin: 0; font-size: clamp(42px, 7vw, 72px); line-height: 0.98; letter-spacing: -0.07em; }
+        .hero p { max-width: 510px; margin: 22px 0 0; color: var(--muted); font-size: 17px; line-height: 1.6; }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+        .search {
+            display: flex;
+            flex: 1;
+            max-width: 480px;
+            padding: 6px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: var(--paper);
+            box-shadow: 0 8px 22px rgba(67, 45, 28, 0.05);
+        }
+        input {
+            width: 100%;
+            min-width: 0;
+            padding: 11px 14px;
+            border: 0;
+            outline: 0;
+            color: var(--ink);
+            background: transparent;
+            font: inherit;
+        }
+        input::placeholder { color: #a7a09a; }
+        button {
+            padding: 11px 20px;
+            border: 0;
+            border-radius: 11px;
+            color: white;
+            background: var(--orange);
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+            transition: background 160ms ease, transform 160ms ease;
+        }
+        button:hover { background: var(--orange-dark); transform: translateY(-1px); }
+        button:focus-visible, input:focus-visible { outline: 3px solid rgba(232, 117, 50, 0.3); outline-offset: 2px; }
+        .count { color: var(--muted); font-size: 14px; white-space: nowrap; }
+
+        .meal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+        .meal-card {
+            position: relative;
+            min-height: 184px;
+            padding: 22px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: var(--paper);
+            box-shadow: var(--shadow);
+            transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+        .meal-card::after {
+            position: absolute;
+            right: -24px;
+            bottom: -30px;
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            background: var(--yellow);
+            opacity: 0.24;
+            content: "";
+        }
+        .meal-card:hover { box-shadow: 0 22px 50px rgba(67, 45, 28, 0.15); transform: translateY(-4px); }
+        .meal-number { color: var(--orange); font-size: 13px; font-weight: 800; }
+        .meal-name { position: relative; z-index: 1; margin: 30px 0 18px; font-size: 21px; letter-spacing: -0.03em; }
+        .meal-footer { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
+        .meal-label { color: var(--muted); font-size: 12px; }
+        .price { color: var(--orange-dark); font-size: 20px; font-weight: 800; }
+        .message { grid-column: 1 / -1; padding: 42px 20px; border: 1px dashed #e2d2c2; border-radius: 20px; color: var(--muted); text-align: center; }
+
+        @media (max-width: 620px) {
+            .shell { padding: 20px 16px 40px; }
+            header { margin-bottom: 48px; }
+            .status { display: none; }
+            .toolbar { align-items: stretch; flex-direction: column; }
+            .search { max-width: none; }
+            .count { padding-left: 4px; }
+        }
     </style>
 </head>
 <body>
-    <h1>Meal Menu</h1>
+    <main class="shell">
+        <header>
+            <div class="brand"><div class="brand-mark" aria-hidden="true">✦</div><span>Chelsea Meals</span></div>
+            <div class="status">Kitchen is open</div>
+        </header>
 
-    <div class="search-bar">
-        <input type="search" id="searchInput" placeholder="Search by meal ID">
-        <button type="button" id="searchButton">Search</button>
-    </div>
+        <section class="hero" aria-labelledby="page-title">
+            <p class="eyebrow">Freshly prepared today</p>
+            <h1 id="page-title">Good food,<br>good mood.</h1>
+            <p>Discover comforting Filipino favorites made for sharing, enjoying, and coming back to.</p>
+        </section>
 
-    <ul id="mealList"></ul>
+        <section aria-label="Meal menu">
+            <div class="toolbar">
+                <form class="search" id="searchForm">
+                    <input type="search" id="searchInput" placeholder="Search by meal ID" aria-label="Search meals by ID">
+                    <button type="submit">Search</button>
+                </form>
+                <div class="count" id="mealCount" aria-live="polite"></div>
+            </div>
+            <div class="meal-grid" id="mealList" aria-live="polite"></div>
+        </section>
+    </main>
 
     <script>
         const mealList = document.getElementById("mealList");
+        const searchForm = document.getElementById("searchForm");
         const searchInput = document.getElementById("searchInput");
-        const searchButton = document.getElementById("searchButton");
+        const mealCount = document.getElementById("mealCount");
 
         function renderMessage(text) {
             mealList.innerHTML = "";
-            const item = document.createElement("li");
-            item.textContent = text;
-            mealList.appendChild(item);
+            const message = document.createElement("div");
+            message.className = "message";
+            message.textContent = text;
+            mealList.appendChild(message);
+            mealCount.textContent = "";
         }
 
         function renderMeals(meals) {
             mealList.innerHTML = "";
+            mealCount.textContent = `${meals.length} ${meals.length === 1 ? "meal" : "meals"} available`;
+
             meals.forEach(meal => {
-                const item = document.createElement("li");
-                item.textContent = meal.id + ". " + meal.meal + " - ₱" + meal.price;
-                mealList.appendChild(item);
+                const card = document.createElement("article");
+                card.className = "meal-card";
+                card.innerHTML = `
+                    <div class="meal-number">MENU ${String(meal.id).padStart(2, "0")}</div>
+                    <h2 class="meal-name"></h2>
+                    <div class="meal-footer">
+                        <span class="meal-label">Today's special</span>
+                        <span class="price">₱${meal.price}</span>
+                    </div>
+                `;
+                card.querySelector(".meal-name").textContent = meal.meal;
+                mealList.appendChild(card);
             });
         }
 
         async function loadMeals() {
-            const response = await fetch("/api/meals");
-            renderMeals(await response.json());
+            try {
+                const response = await fetch("/api/meals");
+                if (!response.ok) throw new Error("Unable to load meals");
+                renderMeals(await response.json());
+            } catch (error) {
+                renderMessage("We couldn't load the menu. Please try again.");
+            }
         }
 
-        async function searchMealById() {
+        async function searchMealById(event) {
+            event.preventDefault();
             const query = searchInput.value.trim();
             if (!query) return loadMeals();
 
@@ -60,13 +230,11 @@
                 if (!response.ok) throw new Error("Meal not found");
                 renderMeals([await response.json()]);
             } catch (error) {
-                renderMessage("Meal not found for ID: " + query);
+                renderMessage(`No meal found for ID ${query}.`);
             }
         }
 
-        searchButton.addEventListener("click", searchMealById);
-        searchInput.addEventListener("keydown", e => { if (e.key === "Enter") searchMealById(); });
-
+        searchForm.addEventListener("submit", searchMealById);
         loadMeals();
     </script>
 </body>
